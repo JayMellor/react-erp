@@ -4,7 +4,8 @@
   "description": "a test app",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --config webpack.config.js",
+    "start": "webpack-dev-server --open --config webpack.config.js",
+    "build": "webpack",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/react-redux": "^7.1.8",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.7",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
@@ -29,6 +31,7 @@
   },
   "dependencies": {
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "react-redux": "^7.2.0"
   }
 }
