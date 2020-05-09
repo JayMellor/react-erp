@@ -1,9 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 
-import { Start } from './components/Start';
+import { Start } from './Start';
+import { store } from './Store';
 
 ReactDOM.render(
-    <Start compiler="TypeScript" framework="React" />,
+    <Provider store={store}>
+        <Start />,
+    </Provider>,
     document.getElementById('root'),
 );

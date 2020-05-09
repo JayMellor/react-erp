@@ -8,8 +8,7 @@ module.exports = {
         filename: 'bundle.js',
     },
     devServer: {
-        publicPath: '/dist/',
-        hot: true,
+        publicPath: '/dist/'
     },
 
     resolve: {
