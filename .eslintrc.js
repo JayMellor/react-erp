@@ -1,7 +1,7 @@
 module.exports = {
     root: true,
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint'],
+    plugins: ['@typescript-eslint', 'react-hooks'],
     parserOptions: {
         tsconfigRootDir: __dirname,
         project: ['./tsconfig.json'],
@@ -11,6 +11,7 @@ module.exports = {
         'plugin:@typescript-eslint/eslint-recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
+        'plugin:react-hooks/recommended',
         'plugin:react/recommended',
         'prettier/@typescript-eslint',
     ],

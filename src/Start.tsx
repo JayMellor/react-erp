@@ -1,42 +1,110 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { style } from 'typestyle';
 import {
-    SomethingState,
-    ADD_SOMETHING,
-    AddSomethingAction,
-    RemoveSomethingAction,
-    REMOVE_SOMETHING,
+    ProductListState,
+    ADD_PRODUCT,
+    AddProductAction,
+    RemoveProductAction,
+    REMOVE_PRODUCT,
+    Product,
+    ProductActions,
 } from './Store';
+import { primary, primaryLightest, primaryDarkest, buttonText } from './colors';
+import { Dispatch } from 'redux';
 
-export const Start = (): JSX.Element => {
-    const [input, setInput] = useState('');
-    const something = useSelector(({ something }: SomethingState) => something);
+const button = style({
+    background: primary.toString(),
+    color: buttonText.toString(),
+    padding: 5,
+    borderRadius: 4,
+});
+
+const alert = style({
+    background: primaryLightest.toString(),
+    color: primaryDarkest.toString(),
+    padding: 10,
+    borderRadius: 5,
+});
+
+const productLineContainer = style({
+    display: 'block',
+});
+
+const defaultQuantity = 1;
+
+// VIEW
+
+const productLine = (dispatch: Dispatch<ProductActions>) => (
+    product: Product,
+): JSX.Element => (
+    <li key={product.reference}>
+        <button
+            onClick={(): RemoveProductAction =>
+                dispatch({
+                    type: REMOVE_PRODUCT,
+                    payload: product.reference,
+                })
+            }
+        >
+            Remove Product
+        </button>
+        <div>
+            {product.reference}, {product.quantity}
+        </div>
+    </li>
+);
+
+const ProductList = (): JSX.Element => {
+    const products = useSelector(({ products }: ProductListState) => products);
+    const dispatch = useDispatch();
+    return <ul>{products.map(productLine(dispatch))}</ul>;
+    // {/* <h2>number of products: {products.length}</h2> */}
+};
+
+const NewProduct = (): JSX.Element => {
+    const [reference, setReference] = useState('');
+    const [quantity, setQuantity] = useState(defaultQuantity);
     const dispatch = useDispatch();
 
     return (
-        <>
+        <div>
             <input
                 type="text"
-                onChange={(event): void => setInput(event.target.value)}
+                onChange={(event): void => setReference(event.target.value)}
+                placeholder="Product reference"
+            ></input>
+            <input
+                type="number"
+                onChange={(event): void =>
+                    setQuantity(parseInt(event.target.value))
+                }
+                defaultValue={defaultQuantity}
             ></input>
             <button
-                onClick={(): AddSomethingAction =>
+                className={button}
+                type="submit"
+                onClick={(): AddProductAction =>
                     dispatch({
-                        type: ADD_SOMETHING,
-                        payload: input,
-                    })
-                }
-            ></button>
-            <button
-                onClick={(): RemoveSomethingAction =>
-                    dispatch({
-                        type: REMOVE_SOMETHING,
+                        type: ADD_PRODUCT,
+                        payload: {
+                            quantity,
+                            reference,
+                        },
                     })
                 }
             >
-                Remove
+                Add Product
             </button>
-            <h2>something: {something}</h2>
+        </div>
+    );
+};
+
+export const Start = (): JSX.Element => {
+    return (
+        <>
+            <NewProduct></NewProduct>
+            <ProductList></ProductList>
         </>
     );
 };

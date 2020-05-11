@@ -1,18 +1,34 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>React Test App</title>
-  </head>
-  <body>
-    <!-- React node -->
-    <div id="root"></div>
+    <head>
+        <meta charset="UTF-8" />
+        <title>React Test App</title>
+        <meta
+            name="viewport"
+            content="initial-scale=1.0, user-scalable=0, width=device-width, height=device-height"
+        />
+        <!-- todo: handle fonts -->
+        <link
+            href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                /* font-family: 'Roboto', sans-serif; */
+                font-family: -apple-system, 'Segoe UI', Roboto, Noto Sans,
+                    Ubuntu, Cantarell, 'Helvetica Neue';
+            }
+        </style>
+    </head>
+    <body>
+        <!-- React node -->
+        <div id="root"></div>
 
-    <!-- Dependencies -->
-    <script src="./node_modules/react/umd/react.development.js"></script>
-    <script src="./node_modules/react-dom/umd/react-dom.development.js"></script>
+        <!-- Dependencies -->
+        <script src="./node_modules/react/umd/react.development.js"></script>
+        <script src="./node_modules/react-dom/umd/react-dom.development.js"></script>
 
-    <!-- Main -->
-    <script src="dist/bundle.js"></script>
-  </body>
+        <!-- Main -->
+        <script src="dist/bundle.js"></script>
+    </body>
 </html>

@@ -1,42 +1,52 @@
 import { createStore, Reducer } from 'redux';
 
-export const ADD_SOMETHING = 'ADD_SOMETHING';
-export const REMOVE_SOMETHING = 'REMOVE_SOMETHING';
+export const ADD_PRODUCT = 'ADD_PRODUCT';
+export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';
 
 // ACTIONS
 
-export interface AddSomethingAction {
-    type: typeof ADD_SOMETHING;
+export interface AddProductAction {
+    type: typeof ADD_PRODUCT;
+    payload: Product;
+}
+
+export interface RemoveProductAction {
+    type: typeof REMOVE_PRODUCT;
     payload: string;
 }
 
-export interface RemoveSomethingAction {
-    type: typeof REMOVE_SOMETHING;
-}
-
-type SomethingActions = AddSomethingAction | RemoveSomethingAction;
+export type ProductActions = AddProductAction | RemoveProductAction;
 
 // STATE
 
-export interface SomethingState {
-    something: string;
+export interface Product {
+    reference: string;
+    quantity: number;
 }
 
-const defaultState: SomethingState = {
-    something: '',
+export interface ProductListState {
+    products: ReadonlyArray<Product>;
+}
+
+const defaultState: ProductListState = {
+    products: [],
 };
 
 // REDUCER
 
-const rootReducer: Reducer<SomethingState, SomethingActions> = (
-    state: SomethingState | undefined,
-    action: SomethingActions,
-): SomethingState => {
+const rootReducer: Reducer<ProductListState, ProductActions> = (
+    state: ProductListState = defaultState,
+    action: ProductActions,
+): ProductListState => {
     switch (action.type) {
-        case ADD_SOMETHING:
-            return { something: action.payload };
-        case REMOVE_SOMETHING:
-            return defaultState;
+        case ADD_PRODUCT:
+            return { products: [...state.products, action.payload] };
+        case REMOVE_PRODUCT:
+            return {
+                products: state.products.filter(
+                    (product) => product.reference !== action.payload,
+                ),
+            };
         default:
             return defaultState;
     }
