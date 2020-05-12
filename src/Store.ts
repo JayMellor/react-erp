@@ -1,4 +1,5 @@
-import { createStore, Reducer } from 'redux';
+import { createStore, Reducer, combineReducers } from 'redux';
+import { addProductReducer } from './add-product/Store';
 
 export const ADD_PRODUCT = 'ADD_PRODUCT';
 export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';
@@ -15,7 +16,7 @@ export interface RemoveProductAction {
     payload: string;
 }
 
-export type ProductActions = AddProductAction | RemoveProductAction;
+export type ProductListActions = AddProductAction | RemoveProductAction;
 
 // STATE
 
@@ -34,9 +35,9 @@ const defaultState: ProductListState = {
 
 // REDUCER
 
-const rootReducer: Reducer<ProductListState, ProductActions> = (
+const productListReducer: Reducer<ProductListState, ProductListActions> = (
     state: ProductListState = defaultState,
-    action: ProductActions,
+    action: ProductListActions,
 ): ProductListState => {
     switch (action.type) {
         case ADD_PRODUCT:
@@ -48,9 +49,15 @@ const rootReducer: Reducer<ProductListState, ProductActions> = (
                 ),
             };
         default:
-            return defaultState;
+            return state;
     }
 };
+
+const rootReducer = combineReducers({
+    productList: productListReducer,
+    addProduct: addProductReducer,
+});
+export type RootState = ReturnType<typeof rootReducer>;
 
 export const store = createStore(
     rootReducer,
