@@ -2,6 +2,7 @@
   "name": "test-app",
   "version": "1.0.0",
   "description": "a test app",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --open --config webpack.config.js",
@@ -31,6 +32,7 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "csstips": "^1.2.0",
     "csx": "^10.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

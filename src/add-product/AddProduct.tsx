@@ -2,7 +2,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import React from 'react';
 import { Dispatch } from 'redux';
 import { style } from 'typestyle';
-import { primary, buttonText } from '../colors';
+import { primary, buttonText, primaryDarkest } from '../colors';
 import {
     AddProductActions,
     QuantityValid,
@@ -14,13 +14,43 @@ import {
 import { Product } from '../models';
 import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
 import { RootState } from '../Store';
+import { sizing } from '../sizes';
+import * as csstips from 'csstips';
 
 // todo - move to more central location
-const button = style({
-    background: primary.toString(),
-    color: buttonText.toString(),
-    padding: 5,
-    borderRadius: 4,
+const button = style(
+    {
+        background: primary.toString(),
+        color: buttonText.toString(),
+        border: `${primaryDarkest.toString()} solid ${sizing.borderWidth}`,
+        borderRadius: sizing.smallest,
+        fontSize: sizing.small,
+    },
+    csstips.padding(sizing.smallest, sizing.smaller),
+);
+
+const input = {
+    height: sizing.normalBig,
+    fontSize: sizing.small,
+    borderRadius: sizing.smallest,
+};
+
+const refInput = style(input, {
+    width: sizing.biggest,
+    paddingLeft: sizing.smaller,
+});
+
+const qtyInput = style(input, {
+    width: sizing.big,
+    margin: sizing.smallest,
+    textAlign: 'right',
+    paddingRight: sizing.smaller,
+});
+
+const formContainer = style({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'baseline',
 });
 
 const referenceIsUnique = (
@@ -158,14 +188,16 @@ export const NewProduct = (): JSX.Element => {
     const dispatch = useDispatch();
 
     return (
-        <form>
+        <form className={formContainer}>
             <input
+                className={refInput}
                 type="text"
                 onChange={handleReferenceChange(dispatch, products)}
                 placeholder="Product reference"
                 value={handleValidatedReference(validatedReference)}
             ></input>
             <input
+                className={qtyInput}
                 type="number"
                 onChange={handleQuantityChange(dispatch)}
                 value={handleValidatedQuantity(validatedQuantity)}
