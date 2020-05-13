@@ -1,5 +1,4 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { AddProductAction, ADD_PRODUCT, RootState, Product } from '../Store';
 import React from 'react';
 import { Dispatch } from 'redux';
 import { style } from 'typestyle';
@@ -12,6 +11,9 @@ import {
     ReferenceInvalid,
     FormSubmittedAction,
 } from './Store';
+import { Product } from '../models';
+import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
+import { RootState } from '../Store';
 
 // todo - move to more central location
 const button = style({
