@@ -1,8 +1,10 @@
 import { useSelector, useDispatch } from 'react-redux';
 import React from 'react';
 import { Dispatch } from 'redux';
-import { style } from 'typestyle';
-import { primary, buttonText, primaryDarkest } from '../colors';
+import { style, classes } from 'typestyle';
+import { NestedCSSProperties } from 'typestyle/lib/types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import {
     AddProductActions,
     QuantityValid,
@@ -14,44 +16,55 @@ import {
 import { Product } from '../models';
 import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
 import { RootState } from '../Store';
-import { sizing } from '../sizes';
-import * as csstips from 'csstips';
+import { sizing } from '../styles/sizes';
+import {
+    input,
+    alertBorder,
+    button,
+    errorContainer,
+    horizontalCenterBaseline,
+} from '../styles/layout';
 
-// todo - move to more central location
-const button = style(
-    {
-        background: primary.toString(),
-        color: buttonText.toString(),
-        border: `${primaryDarkest.toString()} solid ${sizing.borderWidth}`,
-        borderRadius: sizing.smallest,
-        fontSize: sizing.small,
-    },
-    csstips.padding(sizing.smallest, sizing.smaller),
-);
+// STYLES
 
-const input = {
-    height: sizing.normalBig,
-    fontSize: sizing.small,
-    borderRadius: sizing.smallest,
-};
-
-const refInput = style(input, {
+const refInputLayout = {
+    ...input,
     width: sizing.biggest,
     paddingLeft: sizing.smaller,
-});
+    marginRight: sizing.smallest,
+};
 
-const qtyInput = style(input, {
+const refInput = (
+    validatedReference: ReferenceValid | ReferenceInvalid,
+): string => {
+    if (validatedReference.valid) {
+        return style(refInputLayout);
+    }
+    return style(refInputLayout, {
+        border: alertBorder,
+    });
+};
+
+const qtyInputLayout: NestedCSSProperties = {
+    ...input,
     width: sizing.big,
-    margin: sizing.smallest,
+    marginRight: sizing.smallest,
     textAlign: 'right',
     paddingRight: sizing.smaller,
-});
+};
 
-const formContainer = style({
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'baseline',
-});
+const qtyInput = (
+    validatedQuantity: QuantityValid | QuantityInvalid,
+): string => {
+    if (validatedQuantity.valid) {
+        return style(qtyInputLayout);
+    }
+    return style(qtyInputLayout, {
+        border: alertBorder,
+    });
+};
+
+// VALIDATION
 
 const referenceIsUnique = (
     newReference: string,
@@ -66,6 +79,8 @@ const referenceIsUnique = (
     }
     return true;
 };
+
+// SUBMISSION
 
 const submitForm = (
     dispatch: Dispatch<AddProductAction | FormSubmittedAction>,
@@ -90,13 +105,6 @@ const submitForm = (
     dispatch({
         type: 'FORM_SUBMITTED',
     });
-};
-
-const showReferenceError = (isValid: boolean): JSX.Element => {
-    if (!isValid) {
-        return <div>Sommaty here</div>;
-    }
-    return <></>;
 };
 
 const handleReferenceChange = (
@@ -145,6 +153,8 @@ const handleQuantityChange = (dispatch: Dispatch<AddProductActions>) => ({
     }
 };
 
+// VALUE MAPPING
+
 const handleValidatedReference = (
     validatedReference: ReferenceValid | ReferenceInvalid,
 ): string => {
@@ -156,6 +166,22 @@ const handleValidatedReference = (
         case 'DUPLICATE_REFERENCE':
             return validatedReference.reference;
         case 'EMPTY_REFERENCE':
+            return '';
+    }
+};
+
+const displayReferenceError = (
+    validatedReference: ReferenceValid | ReferenceInvalid,
+): string => {
+    if (validatedReference.valid) {
+        return '';
+    }
+
+    switch (validatedReference.error) {
+        case 'DUPLICATE_REFERENCE':
+            return 'This reference has already been added';
+        case 'EMPTY_REFERENCE':
+            // Empty warning to subtly inform the user
             return '';
     }
 };
@@ -175,6 +201,23 @@ const handleValidatedQuantity = (
     }
 };
 
+const displayQuantityError = (
+    validatedQuantity: QuantityValid | QuantityInvalid,
+): string => {
+    if (validatedQuantity.valid) {
+        return '';
+    }
+
+    switch (validatedQuantity.error) {
+        case 'INVALID_NUMBER':
+            return 'Please input a positive number';
+        case 'NOT_A_NUMBER':
+            return 'Please input a numerical quantity';
+    }
+};
+
+// VIEW
+
 export const NewProduct = (): JSX.Element => {
     const products = useSelector(
         ({ productList }: RootState) => productList.products,
@@ -188,20 +231,54 @@ export const NewProduct = (): JSX.Element => {
     const dispatch = useDispatch();
 
     return (
-        <form className={formContainer}>
-            <input
-                className={refInput}
-                type="text"
-                onChange={handleReferenceChange(dispatch, products)}
-                placeholder="Product reference"
-                value={handleValidatedReference(validatedReference)}
-            ></input>
-            <input
-                className={qtyInput}
-                type="number"
-                onChange={handleQuantityChange(dispatch)}
-                value={handleValidatedQuantity(validatedQuantity)}
-            ></input>
+        <form className={horizontalCenterBaseline}>
+            <span
+                className={style({
+                    display: 'flex',
+                    flexDirection: 'column',
+                })}
+            >
+                <input
+                    className={refInput(validatedReference)}
+                    type="text"
+                    onChange={handleReferenceChange(dispatch, products)}
+                    placeholder="Product reference"
+                    value={handleValidatedReference(validatedReference)}
+                ></input>
+                <span
+                    className={classes(
+                        errorContainer,
+                        style({
+                            width: sizing.biggest,
+                        }),
+                    )}
+                >
+                    {displayReferenceError(validatedReference)}
+                </span>
+            </span>
+            <span
+                className={style({
+                    display: 'flex',
+                    flexDirection: 'column',
+                })}
+            >
+                <input
+                    className={qtyInput(validatedQuantity)}
+                    type="number"
+                    onChange={handleQuantityChange(dispatch)}
+                    value={handleValidatedQuantity(validatedQuantity)}
+                ></input>
+                <span
+                    className={classes(
+                        errorContainer,
+                        style({
+                            width: sizing.big,
+                        }),
+                    )}
+                >
+                    {displayQuantityError(validatedQuantity)}
+                </span>
+            </span>
             <button
                 className={button}
                 type="submit"
@@ -211,6 +288,12 @@ export const NewProduct = (): JSX.Element => {
                     validatedReference,
                 )}
             >
+                <FontAwesomeIcon
+                    icon={faPlus}
+                    className={style({
+                        marginRight: sizing.smallest, // todo className for marginRight: smallest?
+                    })}
+                />
                 Add Product
             </button>
         </form>

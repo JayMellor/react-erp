@@ -1,9 +1,10 @@
 import React from 'react';
 import { cssRule, cssRaw } from 'typestyle';
-import { lightestGrey, lighterGrey } from './colors';
+import { lightestGrey, lighterGrey } from './styles/colors';
 import { NewProduct } from './add-product/AddProduct';
 import { ProductList } from './product-list/ProductList';
-import { sizing } from './sizes';
+import { sizing } from './styles/sizes';
+import { border } from 'csx';
 
 cssRaw(`
 @import url('https://fonts.googleapis.com/css?family=Roboto|Lato');
@@ -17,7 +18,11 @@ cssRule('body', {
 
 cssRule('input', {
     fontFamily: 'Lato, sans-serif',
-    border: `${sizing.borderWidth} solid ${lighterGrey.toString()}`,
+    border: border({
+        color: lighterGrey.toString(),
+        style: 'solid',
+        width: sizing.borderWidth,
+    }),
 });
 
 // VIEW
