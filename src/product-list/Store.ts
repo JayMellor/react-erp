@@ -1,5 +1,5 @@
 import { Reducer } from 'redux';
-import { Product } from '../models';
+import { ProductLine } from '../models';
 
 export const ADD_PRODUCT = 'ADD_PRODUCT';
 export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';
@@ -8,7 +8,11 @@ export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';
 
 export interface AddProductAction {
     type: typeof ADD_PRODUCT;
-    payload: Product;
+    payload: ProductLine;
+}
+
+export interface EditProductAction {
+    type: 'EDIT_PRODUCT',
 }
 
 export interface RemoveProductAction {
@@ -21,7 +25,7 @@ export type ProductListActions = AddProductAction | RemoveProductAction;
 // STATE
 
 export interface ProductListState {
-    products: ReadonlyArray<Product>;
+    products: ReadonlyArray<ProductLine>;
 }
 
 const defaultState: ProductListState = {

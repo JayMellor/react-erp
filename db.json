@@ -1,0 +1,22 @@
+{
+    "products": [
+        {
+            "id": 1,
+            "reference": "DXP5180",
+            "description": "Howdens Mondello Glazed External Door",
+            "price": 25
+        },
+        {
+            "id": 2,
+            "reference": "408779310",
+            "description": "Denso Spark Plug",
+            "price": 6.5
+        },
+        {
+            "id": 3,
+            "reference": "BRCTN924",
+            "description": "CARLTON FACING BRICKS RED 65MM",
+            "price": 0.96
+        }
+    ]
+}

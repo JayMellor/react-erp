@@ -9,26 +9,31 @@ import {
     REMOVE_PRODUCT,
 } from './Store';
 import { RootState } from '../Store';
-import { Product } from '../models';
+import { ProductLine } from '../models';
 import { sizing } from '../styles/sizes';
 import {
     primaryLightest,
     primaryDarkest,
     alertLightest,
     alertDarkest,
+    lighterGrey,
 } from '../styles/colors';
+import { solidBorder } from '../styles/layout';
 
 const lineContainer = style(
     {
         display: 'flex',
-        justifyContent: 'center',
+        // justifyContent: 'center',
         alignItems: 'baseline',
+        justifyContent: 'space-between',
+        width: sizing.huger,
     },
     csstips.horizontallySpaced(8),
     csstips.horizontal,
 );
 
 const quantityContainer = style({
+    textAlign: 'right',
     // marginLeft: sizing.small,
 });
 
@@ -57,12 +62,27 @@ const primary = style({
 });
 
 const productLine = (dispatch: Dispatch<ProductListActions>) => (
-    product: Product,
+    product: ProductLine,
 ): JSX.Element => (
     <div className={lineContainer} key={product.reference}>
-        <div>{product.reference}</div>
-        <div className={quantityContainer}>x{product.quantity}</div>
-        <button
+        <div
+            className={style({
+                fontSize: sizing.mediumBig,
+            })}
+        >
+            {product.reference}
+        </div>
+        <div
+            className={classes(
+                quantityContainer,
+                style({
+                    fontSize: sizing.mediumBig,
+                }),
+            )}
+        >
+            {product.quantity}
+        </div>
+        {/* <button
             className={removeButton}
             onClick={(): RemoveProductAction =>
                 dispatch({
@@ -72,7 +92,7 @@ const productLine = (dispatch: Dispatch<ProductListActions>) => (
             }
         >
             Remove Product
-        </button>
+        </button> */}
     </div>
 );
 
@@ -82,17 +102,48 @@ export const ProductList = (): JSX.Element => {
     );
     const dispatch = useDispatch();
     if (products.length > 0) {
-        return <div>{products.map(productLine(dispatch))}</div>;
-    } else {
         return (
-            <>
-                <div className={classes(lineContainer, alert)}>
-                    Add a product to the order
-                </div>
-                <div className={classes(lineContainer, primary)}>
-                    Add a product to the order
-                </div>
-            </>
+            <div
+                className={style({
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                })}
+            >
+                {products
+                    .map<React.ReactNode>(productLine(dispatch))
+                    .reduce((first, rest, idx) => [
+                        first,
+                        <div
+                            className={style({
+                                borderTop: solidBorder(lighterGrey.toString()),
+                                margin: sizing.smaller,
+                                width: sizing.bigger,
+                                height: sizing.borderWidth,
+                            })}
+                            key={idx}
+                        ></div>,
+                        rest,
+                    ])}
+            </div>
         );
     }
+    return (
+        <>
+            <div
+                className={classes(
+                    lineContainer,
+                    alert,
+                    style({
+                        marginTop: 24,
+                    }),
+                )}
+            >
+                Add a product to the order
+            </div>
+            <div className={classes(lineContainer, primary)}>
+                Add a product to the order
+            </div>
+        </>
+    );
 };

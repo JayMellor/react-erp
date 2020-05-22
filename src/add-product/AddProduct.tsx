@@ -4,7 +4,7 @@ import { Dispatch } from 'redux';
 import { style, classes } from 'typestyle';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import {
     AddProductActions,
     QuantityValid,
@@ -23,7 +23,11 @@ import {
     button,
     errorContainer,
     horizontalCenterBaseline,
+    iconButton,
+    solidBorder,
 } from '../styles/layout';
+import { alert, lightestGrey } from '../styles/colors';
+import { ProductDropdown } from './ProductDropdown';
 
 // STYLES
 
@@ -98,6 +102,8 @@ const submitForm = (
         type: ADD_PRODUCT,
         payload: {
             quantity,
+            price: 1,
+            description: 'todo',
             reference,
         },
     });
@@ -238,6 +244,7 @@ export const NewProduct = (): JSX.Element => {
                     flexDirection: 'column',
                 })}
             >
+                <ProductDropdown></ProductDropdown>
                 <input
                     className={refInput(validatedReference)}
                     type="text"
@@ -280,7 +287,7 @@ export const NewProduct = (): JSX.Element => {
                 </span>
             </span>
             <button
-                className={button}
+                className={iconButton}
                 type="submit"
                 onClick={submitForm(
                     dispatch,
@@ -291,11 +298,33 @@ export const NewProduct = (): JSX.Element => {
                 <FontAwesomeIcon
                     icon={faPlus}
                     className={style({
-                        marginRight: sizing.smallest, // todo className for marginRight: smallest?
+                        // marginRight: sizing.smallest, // todo className for marginRight: smallest?
                     })}
                 />
-                Add Product
             </button>
+            {/* <button
+                className={classes(
+                    iconButton,
+                    style({
+                        background: lightestGrey.toString(),
+                        color: alert.toString(),
+                        border: solidBorder(alert.toString())
+                    }),
+                )}
+                type="submit"
+                onClick={submitForm(
+                    dispatch,
+                    validatedQuantity,
+                    validatedReference,
+                )}
+            >
+                <FontAwesomeIcon
+                    icon={faTimes}
+                    className={style({
+                        // marginRight: sizing.smallest, // todo className for marginRight: smallest?
+                    })}
+                />
+            </button> */}
         </form>
     );
 };

@@ -1,16 +1,16 @@
-import { px } from 'csx';
-
-export const sizing: Readonly<{ [key: string]: string | number }> = {
-    none: px(0),
-    borderWidth: px(1),
-    smallest: px(4),
-    smaller: px(8),
-    small: px(12),
-    normal: px(16),
-    normalBig: px(24),
-    normalBigger: px(32),
-    normalBiggest: px(48),
-    big: px(64),
-    bigger: px(96),
-    biggest: px(128),
+export const sizing: Readonly<{ [key: string]: number }> = {
+    none: 0,
+    borderWidth: 1,
+    smallest: 4,
+    smaller: 8,
+    small: 12,
+    normal: 16,
+    mediumBig: 24,
+    mediumBigger: 32,
+    mediumBiggest: 48,
+    big: 64,
+    bigger: 96,
+    biggest: 128,
+    huge: 192,
+    huger: 256,
 };

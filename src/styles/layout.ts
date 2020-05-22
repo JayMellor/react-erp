@@ -1,4 +1,4 @@
-import { style } from 'typestyle';
+import { style, classes } from 'typestyle';
 import * as csstips from 'csstips';
 import { primary, buttonText, primaryDarkest, alert } from './colors';
 import { sizing } from './sizes';
@@ -19,14 +19,24 @@ export const button = style(
     csstips.padding(sizing.smallest, sizing.smaller),
 );
 
-export const alertBorder = border({
-    color: alert.toString(),
-    width: sizing.borderWidth,
-    style: 'solid',
-});
+export const iconButton = classes(
+    button,
+    style({
+        width: sizing.mediumBigger,
+    }),
+);
+
+export const solidBorder = (color: string): string =>
+    border({
+        color,
+        width: sizing.borderWidth,
+        style: 'solid',
+    });
+
+export const alertBorder = solidBorder(alert.toString());
 
 export const input = {
-    height: sizing.normalBig,
+    height: sizing.mediumBig,
     fontSize: sizing.small,
     borderRadius: sizing.smallest,
 };

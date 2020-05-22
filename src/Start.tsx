@@ -1,10 +1,11 @@
 import React from 'react';
-import { cssRule, cssRaw } from 'typestyle';
+import { cssRule, cssRaw, style } from 'typestyle';
 import { lightestGrey, lighterGrey } from './styles/colors';
 import { NewProduct } from './add-product/AddProduct';
 import { ProductList } from './product-list/ProductList';
 import { sizing } from './styles/sizes';
-import { border } from 'csx';
+import { solidBorder } from './styles/layout';
+import * as csstips from 'csstips';
 
 cssRaw(`
 @import url('https://fonts.googleapis.com/css?family=Roboto|Lato');
@@ -18,18 +19,19 @@ cssRule('body', {
 
 cssRule('input', {
     fontFamily: 'Lato, sans-serif',
-    border: border({
-        color: lighterGrey.toString(),
-        style: 'solid',
-        width: sizing.borderWidth,
-    }),
+    border: solidBorder(lighterGrey.toString()),
 });
 
 // VIEW
 
 export const Start = (): JSX.Element => {
     return (
-        <div>
+        <div
+            className={style(
+                csstips.vertical,
+                csstips.verticallySpaced(sizing.normal),
+            )}
+        >
             <NewProduct></NewProduct>
             <ProductList></ProductList>
         </div>

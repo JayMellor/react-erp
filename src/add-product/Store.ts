@@ -1,4 +1,5 @@
 import { Reducer } from 'redux';
+import { Product } from '../models';
 
 // MODEL
 
@@ -42,9 +43,62 @@ export type QuantityValid = {
     value: number;
 };
 
+type DropdownFocus =
+    | {
+          focus: 'NO_FOCUS';
+      }
+    | {
+          focus: 'DROPDOWN_INPUT';
+      }
+    | {
+          focus: 'DROPDOWN_ITEM';
+          item: number; // todo
+      };
+
+type ItemSelected =
+    | {
+          itemSelected: true;
+          item: Product;
+      }
+    | {
+          itemSelected: false;
+      };
+
+export type DropdownState = {
+    open: boolean;
+    filter: string;
+} & ItemSelected;
+// DropdownFocus;
+
+type ProductsEmpty = {
+    state: 'EMPTY';
+};
+
+type ProductsError = {
+    state: 'ERROR';
+    error: string;
+};
+
+type ProductLoading = {
+    state: 'LOADING';
+};
+
+type ProductsLoaded = {
+    state: 'LOADED';
+    products: Product[];
+};
+
+export type ProductsState =
+    | ProductsEmpty
+    | ProductLoading
+    | ProductsError
+    | ProductsLoaded;
+
 type AddProductState = {
     reference: ReferenceValid | ReferenceInvalid;
     quantity: QuantityValid | QuantityInvalid;
+    dropdown: DropdownState;
+    products: ProductsState;
 };
 
 const defaultState: AddProductState = {
@@ -55,6 +109,15 @@ const defaultState: AddProductState = {
     quantity: {
         valid: true,
         value: 1,
+    },
+    dropdown: {
+        open: false,
+        filter: '',
+        itemSelected: false,
+        // focus: 'NO_FOCUS',
+    },
+    products: {
+        state: 'EMPTY',
     },
 };
 
@@ -92,6 +155,47 @@ export interface FormSubmittedAction {
     type: 'FORM_SUBMITTED';
 }
 
+interface LoadingProducts {
+    type: 'PRODUCTS_LOADING';
+}
+
+interface LoadedProducts {
+    type: 'PRODUCTS_LOADED';
+    products: Product[];
+}
+
+interface ErrorProducts {
+    type: 'PRODUCTS_ERROR';
+    error: string;
+}
+
+export type ProductActions = LoadingProducts | LoadedProducts | ErrorProducts;
+
+interface OpenDropdown {
+    type: 'OPEN_DROPDOWN';
+    filter: string;
+}
+
+interface UpdateDropdownFilter {
+    type: 'UPDATE_DROPDOWN_FILTER';
+    filter: string;
+}
+
+interface CloseDropdownWithSelection {
+    type: 'CLOSE_DROPDOWN_WITH_SELECTION';
+    product: Product;
+}
+
+interface CloseDropdownNoSelection {
+    type: 'CLOSE_DROPDOWN_NO_SELECTION';
+}
+
+export type DropdownActions =
+    | OpenDropdown
+    | CloseDropdownNoSelection
+    | UpdateDropdownFilter
+    | CloseDropdownWithSelection;
+
 export type AddProductActions =
     | DuplicateReferenceAction
     | EmptyReferenceAction
@@ -99,7 +203,9 @@ export type AddProductActions =
     | QuantityNotANumberAction
     | InvalidNumericalQuantityAction
     | ValidQuantityAction
-    | FormSubmittedAction;
+    | FormSubmittedAction
+    | DropdownActions
+    | ProductActions;
 
 // UPDATE
 
@@ -160,6 +266,64 @@ export const addProductReducer: Reducer<AddProductState, AddProductActions> = (
             };
         case 'FORM_SUBMITTED':
             return defaultState;
+        case 'OPEN_DROPDOWN':
+            return {
+                ...state,
+                dropdown: {
+                    ...state.dropdown,
+                    open: true,
+                    filter: action.filter,
+                },
+            };
+        case 'PRODUCTS_LOADING':
+            return {
+                ...state,
+                products: {
+                    state: 'LOADING',
+                },
+            };
+        case 'PRODUCTS_LOADED':
+            return {
+                ...state,
+                products: {
+                    state: 'LOADED',
+                    products: action.products,
+                },
+            };
+        case 'PRODUCTS_ERROR':
+            return {
+                ...state,
+                products: {
+                    state: 'ERROR',
+                    error: action.error,
+                },
+            };
+        case 'UPDATE_DROPDOWN_FILTER':
+            return {
+                ...state,
+                dropdown: {
+                    ...state.dropdown,
+                    filter: action.filter,
+                },
+            };
+        case 'CLOSE_DROPDOWN_NO_SELECTION':
+            return {
+                ...state,
+                dropdown: {
+                    ...state.dropdown,
+                    open: false,
+                },
+            };
+        case 'CLOSE_DROPDOWN_WITH_SELECTION':
+            return {
+                ...state,
+                dropdown: {
+                    open: false,
+                    filter: '',
+                    itemSelected: true,
+                    item: action.product,
+                },
+            };
         default:
             return state;
     }
