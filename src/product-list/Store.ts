@@ -1,5 +1,5 @@
 import { Reducer } from 'redux';
-import { ProductLine } from '../models';
+import { ProductLine } from '../products/models';
 
 export const ADD_PRODUCT = 'ADD_PRODUCT';
 export const REMOVE_PRODUCT = 'REMOVE_PRODUCT';

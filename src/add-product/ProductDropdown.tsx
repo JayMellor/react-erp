@@ -2,23 +2,19 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../Store';
 import { Dispatch } from 'redux';
-import {
-    DropdownState,
-    ProductsState,
-    DropdownActions,
-    ProductActions,
-} from './Store';
+import { DropdownState, DropdownActions } from './Store';
 import { input } from '../styles/layout';
 import { style } from 'typestyle';
-import { onDropdownOpen } from './ActionCreators';
-import { Product } from '../models';
-import { alert } from '../styles/colors';
+import { Product } from '../products/models';
+import { lightestGrey } from '../styles/colors';
 import { ChildProps } from '../types';
+import { ProductsState, ProductActions } from '../products/Store';
 
 const DropdownBody = ({ children }: ChildProps): JSX.Element => (
     <div
         className={style({
-            background: alert.toString(),
+            background: lightestGrey.toString(),
+            position: 'absolute',
         })}
     >
         {children}
@@ -106,8 +102,6 @@ const dropdownInput = (
             type: 'OPEN_DROPDOWN',
             filter: dropdownState.filter,
         });
-
-        onDropdownOpen(dispatch, productsState);
     };
     const getInputValue = (): string => {
         if (!dropdownState.open && dropdownState.itemSelected) {
@@ -142,9 +136,7 @@ export const ProductDropdown = (): JSX.Element => {
     const dropdown = useSelector(
         ({ addProduct }: RootState) => addProduct.dropdown,
     );
-    const products = useSelector(
-        ({ addProduct }: RootState) => addProduct.products,
-    );
+    const products = useSelector(({ products }: RootState) => products);
     const dispatch = useDispatch();
 
     return dropdownInput(dropdown, products, dispatch);

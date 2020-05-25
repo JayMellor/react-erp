@@ -13,7 +13,7 @@ import {
     ReferenceInvalid,
     FormSubmittedAction,
 } from './Store';
-import { Product } from '../models';
+import { Product } from '../products/models';
 import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
 import { RootState } from '../Store';
 import { sizing } from '../styles/sizes';

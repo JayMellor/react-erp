@@ -9,7 +9,7 @@ import {
     REMOVE_PRODUCT,
 } from './Store';
 import { RootState } from '../Store';
-import { ProductLine } from '../models';
+import { ProductLine } from '../products/models';
 import { sizing } from '../styles/sizes';
 import {
     primaryLightest,

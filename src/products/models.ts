@@ -22,7 +22,7 @@ const parseToProduct = (maybeProduct: object): maybeProduct is Product => {
 };
 
 export const parseProductResponse = (
-    response: object,
+    response: unknown,
 ):
     | { success: true; response: Product[] }
     | { success: false; message: string } => {

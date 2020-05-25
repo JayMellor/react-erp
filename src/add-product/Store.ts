@@ -1,5 +1,5 @@
 import { Reducer } from 'redux';
-import { Product } from '../models';
+import { Product } from '../products/models';
 
 // MODEL
 
@@ -70,35 +70,10 @@ export type DropdownState = {
 } & ItemSelected;
 // DropdownFocus;
 
-type ProductsEmpty = {
-    state: 'EMPTY';
-};
-
-type ProductsError = {
-    state: 'ERROR';
-    error: string;
-};
-
-type ProductLoading = {
-    state: 'LOADING';
-};
-
-type ProductsLoaded = {
-    state: 'LOADED';
-    products: Product[];
-};
-
-export type ProductsState =
-    | ProductsEmpty
-    | ProductLoading
-    | ProductsError
-    | ProductsLoaded;
-
 type AddProductState = {
     reference: ReferenceValid | ReferenceInvalid;
     quantity: QuantityValid | QuantityInvalid;
     dropdown: DropdownState;
-    products: ProductsState;
 };
 
 const defaultState: AddProductState = {
@@ -115,9 +90,6 @@ const defaultState: AddProductState = {
         filter: '',
         itemSelected: false,
         // focus: 'NO_FOCUS',
-    },
-    products: {
-        state: 'EMPTY',
     },
 };
 
@@ -155,22 +127,6 @@ export interface FormSubmittedAction {
     type: 'FORM_SUBMITTED';
 }
 
-interface LoadingProducts {
-    type: 'PRODUCTS_LOADING';
-}
-
-interface LoadedProducts {
-    type: 'PRODUCTS_LOADED';
-    products: Product[];
-}
-
-interface ErrorProducts {
-    type: 'PRODUCTS_ERROR';
-    error: string;
-}
-
-export type ProductActions = LoadingProducts | LoadedProducts | ErrorProducts;
-
 interface OpenDropdown {
     type: 'OPEN_DROPDOWN';
     filter: string;
@@ -204,8 +160,7 @@ export type AddProductActions =
     | InvalidNumericalQuantityAction
     | ValidQuantityAction
     | FormSubmittedAction
-    | DropdownActions
-    | ProductActions;
+    | DropdownActions;
 
 // UPDATE
 
@@ -266,6 +221,7 @@ export const addProductReducer: Reducer<AddProductState, AddProductActions> = (
             };
         case 'FORM_SUBMITTED':
             return defaultState;
+
         case 'OPEN_DROPDOWN':
             return {
                 ...state,
@@ -273,29 +229,6 @@ export const addProductReducer: Reducer<AddProductState, AddProductActions> = (
                     ...state.dropdown,
                     open: true,
                     filter: action.filter,
-                },
-            };
-        case 'PRODUCTS_LOADING':
-            return {
-                ...state,
-                products: {
-                    state: 'LOADING',
-                },
-            };
-        case 'PRODUCTS_LOADED':
-            return {
-                ...state,
-                products: {
-                    state: 'LOADED',
-                    products: action.products,
-                },
-            };
-        case 'PRODUCTS_ERROR':
-            return {
-                ...state,
-                products: {
-                    state: 'ERROR',
-                    error: action.error,
                 },
             };
         case 'UPDATE_DROPDOWN_FILTER':
