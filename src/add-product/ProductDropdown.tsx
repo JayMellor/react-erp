@@ -1,20 +1,24 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../Store';
 import { Dispatch } from 'redux';
 import { DropdownState, DropdownActions } from './Store';
-import { input } from '../styles/layout';
+import { input, solidBorder, boxShadow } from '../styles/layout';
 import { style } from 'typestyle';
 import { Product } from '../products/models';
-import { lightestGrey } from '../styles/colors';
+import { lightestGrey, lighterGrey } from '../styles/colors';
 import { ChildProps } from '../types';
-import { ProductsState, ProductActions } from '../products/Store';
+import { ProductsState } from '../products/Store';
+import * as csstips from 'csstips';
+import { sizing } from '../styles/sizes';
+import { hsla } from 'csx';
 
 const DropdownBody = ({ children }: ChildProps): JSX.Element => (
     <div
         className={style({
             background: lightestGrey.toString(),
             position: 'absolute',
+            boxShadow: boxShadow(0, 4, 10, hsla(0, 0, 0, 0.1).toString()),
         })}
     >
         {children}
@@ -61,18 +65,39 @@ const dropdownList = (
                 <DropdownBody>
                     {productsState.products
                         .filter(filterItems(dropdownState.filter))
-                        .map((product) => (
+                        .map<ReactNode>((product) => (
                             <div
                                 key={product.reference}
                                 tabIndex={0}
                                 // onClick={selectItem(product)}
                                 onMouseDown={selectItem(product)}
                                 // onFocus={selectItem(product)}
+                                className={style(
+                                    csstips.padding(
+                                        sizing.normal,
+                                        sizing.small,
+                                    ),
+                                )}
                             >
                                 {product.reference} {product.description}{' '}
                                 {product.price}
                             </div>
-                        ))}
+                        ))
+                        .reduce((first, rest, idx) => [
+                            first,
+                            <div
+                                className={style({
+                                    borderTop: solidBorder(
+                                        lighterGrey.toString(),
+                                    ),
+                                    // margin: sizing.smaller,
+                                    // width: sizing.bigger,
+                                    height: sizing.borderWidth,
+                                })}
+                                key={idx}
+                            ></div>,
+                            rest,
+                        ])}
                 </DropdownBody>
             );
     }
@@ -81,7 +106,7 @@ const dropdownList = (
 const dropdownInput = (
     dropdownState: DropdownState,
     productsState: ProductsState,
-    dispatch: Dispatch<DropdownActions | ProductActions>,
+    dispatch: Dispatch<DropdownActions>,
 ): JSX.Element => {
     const filterUpdated = ({
         target,
@@ -110,6 +135,12 @@ const dropdownInput = (
 
         return dropdownState.filter;
     };
+    const getPlaceholder = (): string => {
+        if (dropdownState.itemSelected) {
+            return dropdownState.item.reference;
+        }
+        return '';
+    };
     const closeDropdown = (): void => {
         console.log('blur');
         dispatch({
@@ -121,10 +152,13 @@ const dropdownInput = (
             <div>
                 <input
                     type="text"
-                    className={style(input)}
+                    className={style(input, {
+                        outline: 0,
+                    })}
                     onFocus={onDropdownFocus}
                     onChange={filterUpdated}
                     value={getInputValue()}
+                    placeholder={getPlaceholder()}
                 ></input>
                 {dropdownList(dispatch, dropdownState, productsState)}
             </div>
@@ -137,7 +171,7 @@ export const ProductDropdown = (): JSX.Element => {
         ({ addProduct }: RootState) => addProduct.dropdown,
     );
     const products = useSelector(({ products }: RootState) => products);
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<Dispatch<DropdownActions>>();
 
     return dropdownInput(dropdown, products, dispatch);
 };

@@ -9,9 +9,8 @@ import {
     AddProductActions,
     QuantityValid,
     QuantityInvalid,
-    ReferenceValid,
-    ReferenceInvalid,
     FormSubmittedAction,
+    DropdownState,
 } from './Store';
 import { Product } from '../products/models';
 import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
@@ -36,17 +35,6 @@ const refInputLayout = {
     width: sizing.biggest,
     paddingLeft: sizing.smaller,
     marginRight: sizing.smallest,
-};
-
-const refInput = (
-    validatedReference: ReferenceValid | ReferenceInvalid,
-): string => {
-    if (validatedReference.valid) {
-        return style(refInputLayout);
-    }
-    return style(refInputLayout, {
-        border: alertBorder,
-    });
 };
 
 const qtyInputLayout: NestedCSSProperties = {
@@ -89,51 +77,26 @@ const referenceIsUnique = (
 const submitForm = (
     dispatch: Dispatch<AddProductAction | FormSubmittedAction>,
     validatedQuantity: QuantityValid | QuantityInvalid,
-    validatedReference: ReferenceValid | ReferenceInvalid,
+    dropdownState: DropdownState,
 ) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     event.preventDefault();
-    if (!validatedQuantity.valid || !validatedReference.valid) {
+    if (!validatedQuantity.valid || !dropdownState.itemSelected) {
         return;
     }
 
     const quantity = validatedQuantity.value;
-    const reference = validatedReference.value;
+    const selectedProduct = dropdownState.item;
     dispatch({
         type: ADD_PRODUCT,
         payload: {
+            ...selectedProduct,
             quantity,
-            price: 1,
-            description: 'todo',
-            reference,
         },
     });
 
     dispatch({
         type: 'FORM_SUBMITTED',
     });
-};
-
-const handleReferenceChange = (
-    dispatch: Dispatch<AddProductActions>,
-    products: ReadonlyArray<Product>,
-) => ({ target }: React.ChangeEvent<HTMLInputElement>): void => {
-    const newReference = target.value;
-
-    if (referenceIsUnique(newReference, products) && newReference) {
-        dispatch({
-            type: 'VALID_REFERENCE_INPUT',
-            reference: newReference,
-        });
-    } else if (newReference) {
-        dispatch({
-            type: 'DUPLICATE_REFERENCE_INPUT',
-            reference: newReference,
-        });
-    } else {
-        dispatch({
-            type: 'EMPTY_REFERENCE_INPUT',
-        });
-    }
 };
 
 const handleQuantityChange = (dispatch: Dispatch<AddProductActions>) => ({
@@ -160,37 +123,6 @@ const handleQuantityChange = (dispatch: Dispatch<AddProductActions>) => ({
 };
 
 // VALUE MAPPING
-
-const handleValidatedReference = (
-    validatedReference: ReferenceValid | ReferenceInvalid,
-): string => {
-    if (validatedReference.valid) {
-        return validatedReference.value;
-    }
-
-    switch (validatedReference.error) {
-        case 'DUPLICATE_REFERENCE':
-            return validatedReference.reference;
-        case 'EMPTY_REFERENCE':
-            return '';
-    }
-};
-
-const displayReferenceError = (
-    validatedReference: ReferenceValid | ReferenceInvalid,
-): string => {
-    if (validatedReference.valid) {
-        return '';
-    }
-
-    switch (validatedReference.error) {
-        case 'DUPLICATE_REFERENCE':
-            return 'This reference has already been added';
-        case 'EMPTY_REFERENCE':
-            // Empty warning to subtly inform the user
-            return '';
-    }
-};
 
 const handleValidatedQuantity = (
     validatedQuantity: QuantityValid | QuantityInvalid,
@@ -225,15 +157,13 @@ const displayQuantityError = (
 // VIEW
 
 export const NewProduct = (): JSX.Element => {
-    const products = useSelector(
-        ({ productList }: RootState) => productList.products,
-    );
     const validatedQuantity = useSelector(
         ({ addProduct }: RootState) => addProduct.quantity,
     );
-    const validatedReference = useSelector(
-        ({ addProduct }: RootState) => addProduct.reference,
+    const dropdownState = useSelector(
+        ({ addProduct }: RootState) => addProduct.dropdown,
     );
+
     const dispatch = useDispatch();
 
     return (
@@ -245,14 +175,14 @@ export const NewProduct = (): JSX.Element => {
                 })}
             >
                 <ProductDropdown></ProductDropdown>
-                <input
+                {/* <input
                     className={refInput(validatedReference)}
                     type="text"
                     onChange={handleReferenceChange(dispatch, products)}
                     placeholder="Product reference"
                     value={handleValidatedReference(validatedReference)}
-                ></input>
-                <span
+                ></input> */}
+                {/* <span
                     className={classes(
                         errorContainer,
                         style({
@@ -261,7 +191,7 @@ export const NewProduct = (): JSX.Element => {
                     )}
                 >
                     {displayReferenceError(validatedReference)}
-                </span>
+                </span> */}
             </span>
             <span
                 className={style({
@@ -289,11 +219,7 @@ export const NewProduct = (): JSX.Element => {
             <button
                 className={iconButton}
                 type="submit"
-                onClick={submitForm(
-                    dispatch,
-                    validatedQuantity,
-                    validatedReference,
-                )}
+                onClick={submitForm(dispatch, validatedQuantity, dropdownState)}
             >
                 <FontAwesomeIcon
                     icon={faPlus}
@@ -302,6 +228,10 @@ export const NewProduct = (): JSX.Element => {
                     })}
                 />
             </button>
+            {/* <div>
+                {dropdownState.itemSelected && dropdownState.item.description}
+            </div>
+            <div>{dropdownState.itemSelected && dropdownState.item.price}</div> */}
             {/* <button
                 className={classes(
                     iconButton,
