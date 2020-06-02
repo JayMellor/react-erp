@@ -1,4 +1,4 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import React from 'react';
 import { Dispatch } from 'redux';
 import { style, classes } from 'typestyle';
@@ -10,10 +10,10 @@ import {
     QuantityValid,
     QuantityInvalid,
     FormSubmittedAction,
+    useAddProductReducer,
 } from './Store';
 import { Product } from '../products/models';
 import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
-import { RootState } from '../Store';
 import { sizing } from '../styles/sizes';
 import {
     input,
@@ -74,7 +74,8 @@ const referenceIsUnique = (
 // SUBMISSION
 
 const submitForm = (
-    dispatch: Dispatch<AddProductAction | FormSubmittedAction>,
+    dispatch: React.Dispatch<FormSubmittedAction>,
+    productListDispatch: Dispatch<AddProductAction>,
     validatedQuantity: QuantityValid | QuantityInvalid,
     maybeProduct?: Product,
 ) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
@@ -85,7 +86,7 @@ const submitForm = (
 
     const quantity = validatedQuantity.value;
     const selectedProduct = maybeProduct;
-    dispatch({
+    productListDispatch({
         type: ADD_PRODUCT,
         payload: {
             ...selectedProduct,
@@ -98,7 +99,7 @@ const submitForm = (
     });
 };
 
-const handleQuantityChange = (dispatch: Dispatch<AddProductActions>) => ({
+const handleQuantityChange = (dispatch: React.Dispatch<AddProductActions>) => ({
     target,
 }: React.ChangeEvent<HTMLInputElement>): void => {
     const newInput = target.value;
@@ -156,13 +157,11 @@ const displayQuantityError = (
 // VIEW
 
 export function NewProduct(): JSX.Element {
-    const {
-        quantity: validatedQuantity,
-        product: maybeProduct,
-        submitted,
-    } = useSelector(({ addProduct }: RootState) => addProduct);
-
-    const dispatch = useDispatch();
+    const [
+        { quantity: validatedQuantity, maybeProduct, submitted },
+        dispatch,
+    ] = useAddProductReducer();
+    const productDispatch = useDispatch<Dispatch<AddProductAction>>();
 
     return (
         <form className={horizontalCenterBaseline}>
@@ -220,7 +219,12 @@ export function NewProduct(): JSX.Element {
             <button
                 className={iconButton}
                 type="submit"
-                onClick={submitForm(dispatch, validatedQuantity, maybeProduct)}
+                onClick={submitForm(
+                    dispatch,
+                    productDispatch,
+                    validatedQuantity,
+                    maybeProduct,
+                )}
             >
                 <FontAwesomeIcon icon={faPlus} />
             </button>

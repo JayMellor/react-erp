@@ -1,4 +1,4 @@
-import { Reducer } from 'redux';
+import { Reducer, useReducer, Dispatch } from 'react';
 import { Product } from '../products/models';
 
 // MODEL
@@ -30,7 +30,7 @@ export type QuantityValid = {
 
 type AddProductState = {
     quantity: QuantityValid | QuantityInvalid;
-    product?: Product;
+    maybeProduct?: Product;
     submitted: boolean;
 };
 
@@ -82,7 +82,7 @@ export type AddProductActions =
 
 // UPDATE
 
-export const addProductReducer: Reducer<AddProductState, AddProductActions> = (
+const addProductReducer: Reducer<AddProductState, AddProductActions> = (
     state: AddProductState = defaultState,
     action: AddProductActions,
 ): AddProductState => {
@@ -125,7 +125,7 @@ export const addProductReducer: Reducer<AddProductState, AddProductActions> = (
         case 'FORM_PRODUCT_CHANGED':
             return {
                 ...state,
-                product: action.product,
+                maybeProduct: action.product,
                 submitted: false,
             };
         case 'FORM_SUBMITTED':
@@ -134,3 +134,8 @@ export const addProductReducer: Reducer<AddProductState, AddProductActions> = (
             return state;
     }
 };
+
+export const useAddProductReducer = (): [
+    AddProductState,
+    Dispatch<AddProductActions>,
+] => useReducer(addProductReducer, defaultState);

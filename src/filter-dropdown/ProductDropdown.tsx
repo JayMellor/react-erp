@@ -2,15 +2,15 @@ import React, {
     ReactNode,
     useRef,
     useEffect,
-    useState,
-    useReducer,
     RefObject,
+    Dispatch,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../Store';
-import { Dispatch } from 'react';
-import { input, solidBorder, boxShadow } from '../styles/layout';
 import { style } from 'typestyle';
+import { hsla, borderColor, borderWidth } from 'csx';
+import { padding } from 'csstips';
+import { RootState } from '../Store';
+import { input, solidBorder, boxShadow } from '../styles/layout';
 import { Product } from '../products/models';
 import {
     lightestGrey,
@@ -21,16 +21,12 @@ import {
 import { ChildProps, NavigationKey } from '../types';
 import { ProductsState, ProductActions } from '../products/Store';
 import { sizing } from '../styles/sizes';
-import { hsla, borderColor, borderWidth, borderStyle } from 'csx';
-import { padding, border } from 'csstips';
 import {
-    defaultState,
     DropdownActions,
     useDropdownReducer,
     DropdownState,
-} from './Store';
-import { AddProductAction } from '../product-list/Store';
-import { AddProductActions } from '../add-product/Store';
+    itemIsFocused,
+} from './reducer';
 
 const DropdownBody = ({ children }: ChildProps): JSX.Element => (
     <div
@@ -51,7 +47,7 @@ const dropdownList = (
 ): JSX.Element => {
     const selectItem = (product: Product) => (): void => {
         dispatch({
-            type: 'CLOSE_DROPDOWN_WITH_SELECTION',
+            type: 'DROPDOWN_ITEM_SELECTED',
             item: product,
         });
     };
@@ -60,78 +56,67 @@ const dropdownList = (
         return <></>;
     }
 
-    switch (productsState.state) {
-        case 'EMPTY':
-            return <></>;
-        case 'LOADING':
-            return <DropdownBody>loading</DropdownBody>;
-        case 'ERROR':
-            return <DropdownBody>{productsState.error}</DropdownBody>;
-        case 'LOADED':
-            if (!dropdownState.items) {
-                dispatch({
-                    type: 'POPULATE_DROPDOWN_ITEMS',
-                    items: productsState.products,
-                });
-            }
-            return (
-                <DropdownBody>
-                    {dropdownState.filteredItems &&
-                        dropdownState.filteredItems
-                            .map<ReactNode>((product, idx) => (
-                                <div
-                                    key={idx}
-                                    onClick={selectItem(product)}
-                                    className={style(
-                                        padding(sizing.normal, sizing.small),
-                                        dropdownState.focus ===
-                                            'DROPDOWN_ITEM' && // todo tidy
-                                            dropdownState.itemIndex === idx && {
-                                                // background: primary.toString(),
-                                                // color: primaryLightest.toString(),
-                                                borderLeftColor: borderColor(
-                                                    primary.toString(),
-                                                ),
-                                                borderLeftWidth: borderWidth(
-                                                    sizing.smallest,
-                                                ),
-                                                borderLeftStyle: 'solid',
-                                            },
-                                        {
-                                            $nest: {
-                                                '&:hover': {
-                                                    background: primary.toString(),
-                                                    color: primaryLightest.toString(),
-                                                },
-                                            },
-                                        },
-                                    )}
-                                >
-                                    {product.reference} {product.description}{' '}
-                                    {product.price}
-                                </div>
-                            ))
-                            .reduce(
-                                (first, rest, idx) => [
-                                    first,
-                                    <div
-                                        className={style({
-                                            borderTop: solidBorder(
-                                                lighterGrey.toString(),
-                                            ),
-                                            // margin: sizing.smaller,
-                                            // width: sizing.bigger,
-                                            height: sizing.borderWidth,
-                                        })}
-                                        key={`border${idx}`}
-                                    ></div>,
-                                    rest,
-                                ],
-                                [],
-                            )}
-                </DropdownBody>
-            );
+    if (productsState.state == 'LOADED' && !dropdownState.itemsLoaded) {
+        dispatch({
+            type: 'POPULATE_DROPDOWN_ITEMS',
+            items: productsState.products,
+        });
     }
+
+    if (!dropdownState.itemsLoaded) {
+        return <DropdownBody>loading</DropdownBody>;
+    }
+
+    return (
+        <DropdownBody>
+            {dropdownState.filteredItems
+                .map<ReactNode>((product, idx) => (
+                    <div
+                        key={idx}
+                        onClick={selectItem(product)}
+                        className={style(
+                            padding(sizing.normal, sizing.small),
+                            itemIsFocused(dropdownState.dropdownFocus, idx) && {
+                                // background: primary.toString(),
+                                // color: primaryLightest.toString(),
+                                borderLeftColor: borderColor(
+                                    primary.toString(),
+                                ),
+                                borderLeftWidth: borderWidth(sizing.smallest),
+                                borderLeftStyle: 'solid',
+                            },
+                            {
+                                $nest: {
+                                    '&:hover': {
+                                        background: primary.toString(),
+                                        color: primaryLightest.toString(),
+                                    },
+                                },
+                            },
+                        )}
+                    >
+                        {product.reference} {product.description}{' '}
+                        {product.price}
+                    </div>
+                ))
+                .reduce(
+                    (first, rest, idx) => [
+                        first,
+                        <div
+                            className={style({
+                                borderTop: solidBorder(lighterGrey.toString()),
+                                // margin: sizing.smaller,
+                                // width: sizing.bigger,
+                                height: sizing.borderWidth,
+                            })}
+                            key={`border${idx}`}
+                        ></div>,
+                        rest,
+                    ],
+                    [],
+                )}
+        </DropdownBody>
+    );
 };
 
 const useElementInFocus = (
@@ -145,7 +130,7 @@ const useElementInFocus = (
             !elementRef.current.contains(event.target as Node)
         ) {
             dispatch({
-                type: 'CLOSE_DROPDOWN_NO_SELECTION',
+                type: 'DROPDOWN_EXITED',
             });
         }
     };
@@ -180,12 +165,12 @@ export function ProductDropdown({
     useEffect(() => {
         if (clearDropdown) {
             dispatch({
-                type: 'CLEAR_DROPDOWN_SELECTION',
+                type: 'DROPDOWN_ITEM_DISCARDED',
             });
         }
     }, [clearDropdown, dispatch]);
     useEffect(() => {
-        if (state.itemSelected) {
+        if (state.itemsLoaded && state.itemSelected) {
             parentDispatch({
                 type: 'FORM_PRODUCT_CHANGED',
                 product: state.item,
@@ -197,7 +182,7 @@ export function ProductDropdown({
         target,
     }: React.ChangeEvent<HTMLInputElement>): void => {
         dispatch({
-            type: 'UPDATE_DROPDOWN_FILTER',
+            type: 'DROPDOWN_FILTER_UPDATED',
             filter: target.value,
         });
     };
@@ -206,11 +191,13 @@ export function ProductDropdown({
             type: 'PRODUCTS_LOAD',
         });
         dispatch({
-            type: 'OPEN_DROPDOWN',
-            filter: '',
+            type: 'DROPDOWN_SELECTED',
         });
     };
     const getInputValue = (): string => {
+        if (!state.itemsLoaded) {
+            return '';
+        }
         if (state.open) {
             return state.filter;
         }
@@ -220,12 +207,16 @@ export function ProductDropdown({
         return '';
     };
     const getPlaceholder = (): string => {
-        if (state.itemSelected) {
+        if (state.itemsLoaded && state.itemSelected) {
             return state.item.reference;
         }
         return 'Product Reference';
     };
     const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+        if (!state.itemsLoaded || !state.open) {
+            return;
+        }
+
         switch (event.key as NavigationKey) {
             case 'ArrowUp':
                 dispatch({
@@ -239,17 +230,16 @@ export function ProductDropdown({
                 return;
             case 'Escape':
                 dispatch({
-                    type: 'CLOSE_DROPDOWN_NO_SELECTION',
+                    type: 'DROPDOWN_EXITED',
                 });
                 return;
             case 'Enter':
             case 'Tab':
-                state.open && // needs tidying; needs specific types
-                    state.focus === 'DROPDOWN_ITEM' &&
-                    state.filteredItems &&
+                state.dropdownFocus.focus === 'DROPDOWN_ITEM' &&
                     dispatch({
-                        type: 'CLOSE_DROPDOWN_WITH_SELECTION',
-                        item: state.filteredItems[state.itemIndex],
+                        type: 'DROPDOWN_ITEM_SELECTED',
+                        item:
+                            state.filteredItems[state.dropdownFocus.itemIndex],
                     });
                 return;
             default:
