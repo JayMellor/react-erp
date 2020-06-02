@@ -10,7 +10,6 @@ import {
     QuantityValid,
     QuantityInvalid,
     FormSubmittedAction,
-    DropdownState,
 } from './Store';
 import { Product } from '../products/models';
 import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
@@ -26,7 +25,7 @@ import {
     solidBorder,
 } from '../styles/layout';
 import { alert, lightestGrey } from '../styles/colors';
-import { ProductDropdown } from './ProductDropdown';
+import { ProductDropdown } from '../filter-dropdown/ProductDropdown';
 
 // STYLES
 
@@ -77,15 +76,15 @@ const referenceIsUnique = (
 const submitForm = (
     dispatch: Dispatch<AddProductAction | FormSubmittedAction>,
     validatedQuantity: QuantityValid | QuantityInvalid,
-    dropdownState: DropdownState,
+    maybeProduct?: Product,
 ) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     event.preventDefault();
-    if (!validatedQuantity.valid || !dropdownState.itemSelected) {
+    if (!validatedQuantity.valid || !maybeProduct) {
         return;
     }
 
     const quantity = validatedQuantity.value;
-    const selectedProduct = dropdownState.item;
+    const selectedProduct = maybeProduct;
     dispatch({
         type: ADD_PRODUCT,
         payload: {
@@ -156,13 +155,12 @@ const displayQuantityError = (
 
 // VIEW
 
-export const NewProduct = (): JSX.Element => {
-    const validatedQuantity = useSelector(
-        ({ addProduct }: RootState) => addProduct.quantity,
-    );
-    const dropdownState = useSelector(
-        ({ addProduct }: RootState) => addProduct.dropdown,
-    );
+export function NewProduct(): JSX.Element {
+    const {
+        quantity: validatedQuantity,
+        product: maybeProduct,
+        submitted,
+    } = useSelector(({ addProduct }: RootState) => addProduct);
 
     const dispatch = useDispatch();
 
@@ -174,7 +172,10 @@ export const NewProduct = (): JSX.Element => {
                     flexDirection: 'column',
                 })}
             >
-                <ProductDropdown></ProductDropdown>
+                <ProductDropdown
+                    clearDropdown={submitted}
+                    parentDispatch={dispatch}
+                ></ProductDropdown>
                 {/* <input
                     className={refInput(validatedReference)}
                     type="text"
@@ -219,14 +220,9 @@ export const NewProduct = (): JSX.Element => {
             <button
                 className={iconButton}
                 type="submit"
-                onClick={submitForm(dispatch, validatedQuantity, dropdownState)}
+                onClick={submitForm(dispatch, validatedQuantity, maybeProduct)}
             >
-                <FontAwesomeIcon
-                    icon={faPlus}
-                    className={style({
-                        // marginRight: sizing.smallest, // todo className for marginRight: smallest?
-                    })}
-                />
+                <FontAwesomeIcon icon={faPlus} />
             </button>
             {/* <div>
                 {dropdownState.itemSelected && dropdownState.item.description}
@@ -257,4 +253,4 @@ export const NewProduct = (): JSX.Element => {
             </button> */}
         </form>
     );
-};
+}

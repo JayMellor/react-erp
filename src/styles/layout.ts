@@ -1,5 +1,5 @@
 import { style, classes } from 'typestyle';
-import * as csstips from 'csstips';
+import { padding } from 'csstips';
 import { primary, buttonText, primaryDarkest, alert } from './colors';
 import { sizing } from './sizes';
 import { border, px } from 'csx';
@@ -18,7 +18,7 @@ export const button = style(
         borderRadius: sizing.smallest,
         fontSize: sizing.small,
     },
-    csstips.padding(sizing.smallest, sizing.smaller),
+    padding(sizing.smallest, sizing.smaller),
 );
 
 export const iconButton = classes(
@@ -37,7 +37,7 @@ export const iconButton = classes(
  * @param offsetY Offset in Y axis in pixels
  * @param blurRadius
  * @param color Colour of shadow
- * 
+ *
  * @returns Constructed box shadow string
  */
 export const boxShadow = (

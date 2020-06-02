@@ -1,5 +1,5 @@
 import { SagaIterator } from 'redux-saga';
-import { select, cancel, put, call } from 'redux-saga/effects';
+import { select, cancel, put, call, takeLatest } from 'redux-saga/effects';
 import { RootState } from '../Store';
 import { fetchProducts } from '../api/product';
 import { parseProductResponse } from './models';
@@ -7,7 +7,7 @@ import { parseProductResponse } from './models';
 const productsLoaded = (state: RootState): boolean =>
     state.products.state === 'LOADED';
 
-export function* getProductsSaga(): SagaIterator {
+function* getProductsSaga(): SagaIterator {
     const loaded: boolean = yield select(productsLoaded);
     if (loaded) {
         yield cancel();
@@ -37,4 +37,8 @@ export function* getProductsSaga(): SagaIterator {
             error: error.message,
         });
     }
+}
+
+export function* addProductSaga(): SagaIterator {
+    yield takeLatest('PRODUCTS_LOAD', getProductsSaga);
 }

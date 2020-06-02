@@ -10,6 +10,15 @@ export type AppThunk<ReturnType = void> = ThunkAction<
     Action<string>
 >;
 
+export type NavigationKey =
+    | 'ArrowLeft'
+    | 'ArrowRight'
+    | 'ArrowUp'
+    | 'ArrowDown'
+    | 'Escape'
+    | 'Enter'
+    | 'Tab';
+
 export interface ChildProps {
     children: ReactNode;
 }

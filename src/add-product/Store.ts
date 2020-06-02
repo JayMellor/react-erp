@@ -28,36 +28,10 @@ export type QuantityValid = {
     value: number;
 };
 
-type DropdownFocus =
-    | {
-          focus: 'NO_FOCUS';
-      }
-    | {
-          focus: 'DROPDOWN_INPUT';
-      }
-    | {
-          focus: 'DROPDOWN_ITEM';
-          item: number; // todo
-      };
-
-type ItemSelected =
-    | {
-          itemSelected: true;
-          item: Product;
-      }
-    | {
-          itemSelected: false;
-      };
-
-export type DropdownState = {
-    open: boolean;
-    filter: string;
-} & ItemSelected;
-// DropdownFocus;
-
 type AddProductState = {
     quantity: QuantityValid | QuantityInvalid;
-    dropdown: DropdownState;
+    product?: Product;
+    submitted: boolean;
 };
 
 const defaultState: AddProductState = {
@@ -65,12 +39,7 @@ const defaultState: AddProductState = {
         valid: true,
         value: 1,
     },
-    dropdown: {
-        open: false,
-        filter: '',
-        itemSelected: false,
-        // focus: 'NO_FOCUS',
-    },
+    submitted: false,
 };
 
 // ACTIONS
@@ -94,42 +63,22 @@ export interface ValidQuantityAction {
     quantity: number;
 }
 
-export interface FormSubmittedAction {
-    type: 'FORM_SUBMITTED';
-}
-
-interface OpenDropdown {
-    type: 'OPEN_DROPDOWN';
-    filter: string;
-}
-
-interface UpdateDropdownFilter {
-    type: 'UPDATE_DROPDOWN_FILTER';
-    filter: string;
-}
-
-interface CloseDropdownWithSelection {
-    type: 'CLOSE_DROPDOWN_WITH_SELECTION';
+export interface ProductChanged {
+    type: 'FORM_PRODUCT_CHANGED';
     product: Product;
 }
 
-interface CloseDropdownNoSelection {
-    type: 'CLOSE_DROPDOWN_NO_SELECTION';
+export interface FormSubmittedAction {
+    type: 'FORM_SUBMITTED';
 }
-
-export type DropdownActions =
-    | OpenDropdown
-    | CloseDropdownNoSelection
-    | UpdateDropdownFilter
-    | CloseDropdownWithSelection;
 
 export type AddProductActions =
     // | DuplicateReferenceAction
     | QuantityNotANumberAction
     | InvalidNumericalQuantityAction
     | ValidQuantityAction
-    | FormSubmittedAction
-    | DropdownActions;
+    | ProductChanged
+    | FormSubmittedAction;
 
 // UPDATE
 
@@ -171,45 +120,16 @@ export const addProductReducer: Reducer<AddProductState, AddProductActions> = (
                     valid: true,
                     value: action.quantity,
                 },
+                submitted: false,
+            };
+        case 'FORM_PRODUCT_CHANGED':
+            return {
+                ...state,
+                product: action.product,
+                submitted: false,
             };
         case 'FORM_SUBMITTED':
-            return defaultState;
-
-        case 'OPEN_DROPDOWN':
-            return {
-                ...state,
-                dropdown: {
-                    ...state.dropdown,
-                    open: true,
-                    filter: action.filter,
-                },
-            };
-        case 'UPDATE_DROPDOWN_FILTER':
-            return {
-                ...state,
-                dropdown: {
-                    ...state.dropdown,
-                    filter: action.filter,
-                },
-            };
-        case 'CLOSE_DROPDOWN_NO_SELECTION':
-            return {
-                ...state,
-                dropdown: {
-                    ...state.dropdown,
-                    open: false,
-                },
-            };
-        case 'CLOSE_DROPDOWN_WITH_SELECTION':
-            return {
-                ...state,
-                dropdown: {
-                    open: false,
-                    filter: '',
-                    itemSelected: true,
-                    item: action.product,
-                },
-            };
+            return { ...defaultState, submitted: true };
         default:
             return state;
     }

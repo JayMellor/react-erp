@@ -33,6 +33,10 @@ const defaultState: ProductsState = {
 
 // ACTIONS
 
+interface LoadProducts {
+    type: 'PRODUCTS_LOAD';
+}
+
 interface LoadingProducts {
     type: 'PRODUCTS_LOADING';
 }
@@ -47,7 +51,11 @@ interface ErrorProducts {
     error: string;
 }
 
-export type ProductActions = LoadingProducts | LoadedProducts | ErrorProducts;
+export type ProductActions =
+    | LoadProducts
+    | LoadingProducts
+    | LoadedProducts
+    | ErrorProducts;
 
 // REDUCER
 

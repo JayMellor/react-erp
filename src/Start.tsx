@@ -5,7 +5,7 @@ import { NewProduct } from './add-product/AddProduct';
 import { ProductList } from './product-list/ProductList';
 import { sizing } from './styles/sizes';
 import { solidBorder } from './styles/layout';
-import * as csstips from 'csstips';
+import { vertical, verticallySpaced } from 'csstips';
 
 cssRaw(`
 @import url('https://fonts.googleapis.com/css?family=Roboto|Lato');
@@ -28,8 +28,8 @@ export const Start = (): JSX.Element => {
     return (
         <div
             className={style(
-                csstips.vertical,
-                csstips.verticallySpaced(sizing.normal),
+                vertical,
+                verticallySpaced(sizing.normal),
             )}
         >
             <NewProduct></NewProduct>

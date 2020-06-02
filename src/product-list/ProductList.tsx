@@ -2,7 +2,7 @@ import { Dispatch } from 'redux';
 import React from 'react';
 import { style, classes } from 'typestyle';
 import { useSelector, useDispatch } from 'react-redux';
-import * as csstips from 'csstips';
+import { horizontallySpaced, horizontal } from 'csstips';
 import {
     ProductListActions,
     RemoveProductAction,
@@ -28,8 +28,8 @@ const lineContainer = style(
         justifyContent: 'space-between',
         width: sizing.huger,
     },
-    csstips.horizontallySpaced(8),
-    csstips.horizontal,
+    horizontallySpaced(8),
+    horizontal,
 );
 
 const quantityContainer = style({
