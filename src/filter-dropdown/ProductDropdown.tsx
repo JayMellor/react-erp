@@ -27,6 +27,7 @@ import {
     DropdownState,
     itemIsFocused,
 } from './reducer';
+import { itemSet } from './types';
 
 const DropdownBody = ({ children }: ChildProps): JSX.Element => (
     <div
@@ -144,7 +145,7 @@ const useElementInFocus = (
 };
 
 export interface ProductDropdownProps {
-    parentDispatch: Dispatch<any>; // todo change to specific dispatch
+    parentDispatch: itemSet<Product>;
     clearDropdown: boolean;
 }
 
@@ -171,10 +172,7 @@ export function ProductDropdown({
     }, [clearDropdown, dispatch]);
     useEffect(() => {
         if (state.itemsLoaded && state.itemSelected) {
-            parentDispatch({
-                type: 'FORM_PRODUCT_CHANGED',
-                product: state.item,
-            });
+            parentDispatch(state.item);
         }
     }, [state, parentDispatch]);
 
@@ -248,13 +246,15 @@ export function ProductDropdown({
         }
     };
     return (
-        <div ref={elementRef} onKeyDown={onKeyDown}>
+        <div ref={elementRef}>
             <input
                 type="text"
                 className={style(input, {
-                    outline: 0,
+                    outline: sizing.none,
+                    paddingLeft: sizing.small,
                 })}
                 onFocus={onDropdownFocus}
+                onKeyDown={onKeyDown}
                 onChange={onfilterUpdated}
                 value={getInputValue()}
                 placeholder={getPlaceholder()}

@@ -8,15 +8,19 @@ export interface ProductLine extends Product {
     quantity: number;
 }
 
+export type SubmitLine = (product: ProductLine) => void;
+
+// PARSING
+
 const parseToProduct = (maybeProduct: object): maybeProduct is Product => {
     if (typeof (maybeProduct as Product).reference !== 'string') {
-        throw new Error('Field reference not found');
+        throw new Error('Reference field not found');
     }
     if (typeof (maybeProduct as Product).price !== 'number') {
-        throw new Error('Field price not found');
+        throw new Error('Price field not found');
     }
     if (typeof (maybeProduct as Product).description !== 'string') {
-        throw new Error('Field description not found');
+        throw new Error('Description field not found');
     }
     return true;
 };

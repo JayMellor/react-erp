@@ -1,11 +1,9 @@
 import React from 'react';
-import { cssRule, cssRaw, style } from 'typestyle';
+import { cssRule, cssRaw } from 'typestyle';
 import { lightestGrey, lighterGrey } from './styles/colors';
-import { NewProduct } from './add-product/AddProduct';
-import { ProductList } from './product-list/ProductList';
 import { sizing } from './styles/sizes';
 import { solidBorder } from './styles/layout';
-import { vertical, verticallySpaced } from 'csstips';
+import { OrderBody } from './order-body/OrderBody';
 
 cssRaw(`
 @import url('https://fonts.googleapis.com/css?family=Roboto|Lato');
@@ -25,15 +23,5 @@ cssRule('input', {
 // VIEW
 
 export const Start = (): JSX.Element => {
-    return (
-        <div
-            className={style(
-                vertical,
-                verticallySpaced(sizing.normal),
-            )}
-        >
-            <NewProduct></NewProduct>
-            <ProductList></ProductList>
-        </div>
-    );
+    return <OrderBody></OrderBody>;
 };

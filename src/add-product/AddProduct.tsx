@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Dispatch } from 'redux';
 import { style, classes } from 'typestyle';
 import { NestedCSSProperties } from 'typestyle/lib/types';
@@ -11,9 +11,8 @@ import {
     QuantityInvalid,
     FormSubmittedAction,
     useAddProductReducer,
-} from './Store';
-import { Product } from '../products/models';
-import { AddProductAction, ADD_PRODUCT } from '../product-list/Store';
+} from './reducer';
+import { Product, ProductLine, SubmitLine } from '../products/models';
 import { sizing } from '../styles/sizes';
 import {
     input,
@@ -75,7 +74,7 @@ const referenceIsUnique = (
 
 const submitForm = (
     dispatch: React.Dispatch<FormSubmittedAction>,
-    productListDispatch: Dispatch<AddProductAction>,
+    submitLine: SubmitLine,
     validatedQuantity: QuantityValid | QuantityInvalid,
     maybeProduct?: Product,
 ) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
@@ -86,12 +85,9 @@ const submitForm = (
 
     const quantity = validatedQuantity.value;
     const selectedProduct = maybeProduct;
-    productListDispatch({
-        type: ADD_PRODUCT,
-        payload: {
-            ...selectedProduct,
-            quantity,
-        },
+    submitLine({
+        ...selectedProduct,
+        quantity,
     });
 
     dispatch({
@@ -156,12 +152,24 @@ const displayQuantityError = (
 
 // VIEW
 
-export function NewProduct(): JSX.Element {
+interface NewProductProps {
+    submitLine: SubmitLine;
+}
+
+export function NewProduct({ submitLine }: NewProductProps): JSX.Element {
     const [
         { quantity: validatedQuantity, maybeProduct, submitted },
         dispatch,
     ] = useAddProductReducer();
-    const productDispatch = useDispatch<Dispatch<AddProductAction>>();
+    const formChanged = useCallback(
+        (item: Product): void => {
+            dispatch({
+                type: 'FORM_PRODUCT_CHANGED',
+                product: item,
+            });
+        },
+        [dispatch],
+    );
 
     return (
         <form className={horizontalCenterBaseline}>
@@ -173,15 +181,8 @@ export function NewProduct(): JSX.Element {
             >
                 <ProductDropdown
                     clearDropdown={submitted}
-                    parentDispatch={dispatch}
+                    parentDispatch={formChanged}
                 ></ProductDropdown>
-                {/* <input
-                    className={refInput(validatedReference)}
-                    type="text"
-                    onChange={handleReferenceChange(dispatch, products)}
-                    placeholder="Product reference"
-                    value={handleValidatedReference(validatedReference)}
-                ></input> */}
                 {/* <span
                     className={classes(
                         errorContainer,
@@ -192,6 +193,15 @@ export function NewProduct(): JSX.Element {
                 >
                     {displayReferenceError(validatedReference)}
                 </span> */}
+                {maybeProduct && (
+                    <div
+                        className={style({
+                            fontSize: sizing.small,
+                        })}
+                    >
+                        {maybeProduct.description}
+                    </div>
+                )}
             </span>
             <span
                 className={style({
@@ -221,7 +231,7 @@ export function NewProduct(): JSX.Element {
                 type="submit"
                 onClick={submitForm(
                     dispatch,
-                    productDispatch,
+                    submitLine,
                     validatedQuantity,
                     maybeProduct,
                 )}

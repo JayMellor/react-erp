@@ -1,14 +1,5 @@
-import { Dispatch } from 'redux';
 import React from 'react';
 import { style, classes } from 'typestyle';
-import { useSelector, useDispatch } from 'react-redux';
-import { horizontallySpaced, horizontal } from 'csstips';
-import {
-    ProductListActions,
-    RemoveProductAction,
-    REMOVE_PRODUCT,
-} from './Store';
-import { RootState } from '../Store';
 import { ProductLine } from '../products/models';
 import { sizing } from '../styles/sizes';
 import {
@@ -20,17 +11,12 @@ import {
 } from '../styles/colors';
 import { solidBorder } from '../styles/layout';
 
-const lineContainer = style(
-    {
-        display: 'flex',
-        // justifyContent: 'center',
-        alignItems: 'baseline',
-        justifyContent: 'space-between',
-        width: sizing.huger,
-    },
-    horizontallySpaced(8),
-    horizontal,
-);
+const lineContainer = style({
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    width: sizing.huger,
+});
 
 const quantityContainer = style({
     textAlign: 'right',
@@ -40,6 +26,18 @@ const quantityContainer = style({
 const removeButton = style({
     // marginLeft: sizing.bigger,
 });
+
+const divider = (
+    <div
+        className={style({
+            borderTop: solidBorder(lighterGrey.toString()),
+            marginTop: sizing.smaller,
+            marginBottom: sizing.smaller,
+            width: sizing.huger,
+            height: sizing.borderWidth,
+        })}
+    ></div>
+);
 
 const alert = style({
     background: alertLightest.toString(),
@@ -61,28 +59,48 @@ const primary = style({
     borderRadius: sizing.smallest,
 });
 
-const productLine = (dispatch: Dispatch<ProductListActions>) => (
-    product: ProductLine,
-): JSX.Element => (
-    <div className={lineContainer} key={product.reference}>
-        <div
-            className={style({
-                fontSize: sizing.mediumBig,
-            })}
-        >
-            {product.reference}
-        </div>
-        <div
-            className={classes(
-                quantityContainer,
-                style({
-                    fontSize: sizing.mediumBig,
-                }),
-            )}
-        >
-            {product.quantity}
-        </div>
-        {/* <button
+const productLine = () => (product: ProductLine): JSX.Element => (
+    <div key={product.reference}>
+        <div className={lineContainer}>
+            <div
+                className={style({
+                    fontSize: sizing.normal,
+                })}
+            >
+                {product.reference}
+            </div>
+            <div
+                className={classes(
+                    quantityContainer,
+                    style({
+                        fontSize: sizing.normal,
+                    }),
+                )}
+            >
+                <span
+                    className={style({
+                        fontSize: sizing.small,
+                    })}
+                >
+                    x
+                </span>
+                {product.quantity}
+            </div>
+            <div
+                className={style({
+                    fontSize: sizing.normal,
+                })}
+            >
+                <span
+                    className={style({
+                        fontSize: sizing.small,
+                    })}
+                >
+                    £
+                </span>
+                {product.price.toFixed(2)}
+            </div>
+            {/* <button
             className={removeButton}
             onClick={(): RemoveProductAction =>
                 dispatch({
@@ -93,14 +111,24 @@ const productLine = (dispatch: Dispatch<ProductListActions>) => (
         >
             Remove Product
         </button> */}
+        </div>
+        <div
+            className={style({
+                fontSize: sizing.small,
+                marginTop: sizing.smallest,
+            })}
+        >
+            {product.description}
+        </div>
+        {divider}
     </div>
 );
 
-export const ProductList = (): JSX.Element => {
-    const products = useSelector(
-        ({ productList }: RootState) => productList.products,
-    );
-    const dispatch = useDispatch();
+interface ProductListProps {
+    products: ReadonlyArray<ProductLine>;
+}
+
+export function ProductList({ products }: ProductListProps): JSX.Element {
     if (products.length > 0) {
         return (
             <div
@@ -110,21 +138,8 @@ export const ProductList = (): JSX.Element => {
                     alignItems: 'center',
                 })}
             >
-                {products
-                    .map<React.ReactNode>(productLine(dispatch))
-                    .reduce((first, rest, idx) => [
-                        first,
-                        <div
-                            className={style({
-                                borderTop: solidBorder(lighterGrey.toString()),
-                                margin: sizing.smaller,
-                                width: sizing.bigger,
-                                height: sizing.borderWidth,
-                            })}
-                            key={idx}
-                        ></div>,
-                        rest,
-                    ])}
+                {divider}
+                {products.map<React.ReactNode>(productLine())}
             </div>
         );
     }
@@ -146,4 +161,4 @@ export const ProductList = (): JSX.Element => {
             </div>
         </>
     );
-};
+}

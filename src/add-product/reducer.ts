@@ -138,4 +138,7 @@ const addProductReducer: Reducer<AddProductState, AddProductActions> = (
 export const useAddProductReducer = (): [
     AddProductState,
     Dispatch<AddProductActions>,
-] => useReducer(addProductReducer, defaultState);
+] => {
+    const [state, dispatch] = useReducer(addProductReducer, defaultState);
+    return [state, dispatch];
+};

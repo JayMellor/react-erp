@@ -72,7 +72,7 @@ export type DropdownState<ItemType> = InternalState<ItemType> &
         | ClosedLoadedState<ItemType>
     );
 
-export const defaultState = <ItemType>(
+const defaultState = <ItemType>(
     filterItems: FilterFunction<ItemType>,
 ): DropdownState<ItemType> => ({
     filterItems,
