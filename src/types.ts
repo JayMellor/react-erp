@@ -9,6 +9,8 @@ export type NavigationKey =
     | 'Enter'
     | 'Tab';
 
+export type TypingKey = ' ' | 'Backspace' | 'Delete';
+
 export interface ChildProps {
     children?: ReactNode;
 }

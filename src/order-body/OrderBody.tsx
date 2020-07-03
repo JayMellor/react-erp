@@ -8,8 +8,28 @@ const useProductList = (
 ): [ProductLine[], SubmitLine] => {
     const [products, setProducts] = useState<ProductLine[]>(initialState);
     const updateProducts = useCallback(
-        (product: ProductLine) => {
-            setProducts([...products, product]);
+        (updatedProduct: ProductLine) => {
+            const existingLine = products.findIndex(
+                (productLine) =>
+                    productLine.reference === updatedProduct.reference,
+            );
+            if (existingLine > -1) {
+                setProducts(
+                    products.map((productLine, idx) => {
+                        if (idx === existingLine) {
+                            return {
+                                ...productLine,
+                                quantity:
+                                    productLine.quantity +
+                                    updatedProduct.quantity,
+                            };
+                        }
+                        return productLine;
+                    }),
+                );
+            } else {
+                setProducts([...products, updatedProduct]);
+            }
         },
         [products],
     );

@@ -18,7 +18,7 @@ import {
     primaryLightest,
     primary,
 } from '../styles/colors';
-import { ChildProps, NavigationKey } from '../types';
+import { ChildProps, NavigationKey, TypingKey } from '../types';
 import { ProductsState, ProductActions } from '../products/Store';
 import { sizing } from '../styles/sizes';
 import {
@@ -211,8 +211,29 @@ export function ProductDropdown({
         return 'Product Reference';
     };
     const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
-        if (!state.itemsLoaded || !state.open) {
+        if (!state.itemsLoaded) {
             return;
+        }
+
+        if (!state.open) {
+            switch (event.key as TypingKey | NavigationKey) {
+                case 'ArrowDown':
+                case 'ArrowUp':
+                case 'Backspace':
+                case 'Delete':
+                case ' ':
+                    dispatch({
+                        type: 'DROPDOWN_SELECTED',
+                    });
+                    return;
+                case 'ArrowLeft':
+                case 'ArrowRight':
+                    event.preventDefault();
+                    return;
+                default:
+                    // ignore
+                    return;
+            }
         }
 
         switch (event.key as NavigationKey) {
@@ -232,13 +253,16 @@ export function ProductDropdown({
                 });
                 return;
             case 'Enter':
+                event.preventDefault();
+            // eslint-disable-next-line no-fallthrough
             case 'Tab':
-                state.dropdownFocus.focus === 'DROPDOWN_ITEM' &&
+                if (state.dropdownFocus.focus === 'DROPDOWN_ITEM') {
                     dispatch({
                         type: 'DROPDOWN_ITEM_SELECTED',
                         item:
                             state.filteredItems[state.dropdownFocus.itemIndex],
                     });
+                }
                 return;
             default:
                 // ignore
