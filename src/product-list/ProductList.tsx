@@ -1,6 +1,6 @@
 import React from 'react';
 import { style, classes } from 'typestyle';
-import { ProductLine } from '../products/models';
+import { ProductLine, productLinePrice } from '../products/models';
 import { sizing } from '../styles/sizes';
 import {
     primaryLightest,
@@ -69,23 +69,7 @@ const productLine = () => (product: ProductLine): JSX.Element => (
             >
                 {product.reference}
             </div>
-            <div
-                className={classes(
-                    quantityContainer,
-                    style({
-                        fontSize: sizing.normal,
-                    }),
-                )}
-            >
-                <span
-                    className={style({
-                        fontSize: sizing.small,
-                    })}
-                >
-                    x
-                </span>
-                {product.quantity}
-            </div>
+            @
             <div
                 className={style({
                     fontSize: sizing.normal,
@@ -99,6 +83,35 @@ const productLine = () => (product: ProductLine): JSX.Element => (
                     £
                 </span>
                 {product.price.toFixed(2)}
+            </div>
+            <div
+                className={classes(
+                    quantityContainer,
+                    style({
+                        fontSize: sizing.normal,
+                        color: primaryDarkest.toString(),
+                    }),
+                )}
+            >
+                <span
+                    className={style({
+                        fontSize: sizing.small,
+                    })}
+                >
+                    x
+                </span>
+                {product.quantity}
+            </div>
+            =
+            <div>
+                <span
+                    className={style({
+                        fontSize: sizing.small,
+                    })}
+                >
+                    £
+                </span>
+                {productLinePrice(product).toFixed(2)}
             </div>
             {/* <button
             className={removeButton}
@@ -140,6 +153,32 @@ export function ProductList({ products }: ProductListProps): JSX.Element {
             >
                 {divider}
                 {products.map<React.ReactNode>(productLine())}
+                <div
+                    className={style({
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        justifyContent: 'space-between',
+                        width: sizing.huger,
+                    })}
+                >
+                    Total
+                    <span>
+                        <span
+                            className={style({
+                                fontSize: sizing.small,
+                            })}
+                        >
+                            £
+                        </span>
+                        {products
+                            .reduce(
+                                (runningTotal, product) =>
+                                    runningTotal + productLinePrice(product),
+                                0,
+                            )
+                            .toFixed(2)}
+                    </span>
+                </div>
             </div>
         );
     }

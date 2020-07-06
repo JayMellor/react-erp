@@ -1,5 +1,5 @@
-import { useDispatch } from 'react-redux';
-import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, ReactNode } from 'react';
 import { Dispatch } from 'redux';
 import { style, classes } from 'typestyle';
 import { NestedCSSProperties } from 'typestyle/lib/types';
@@ -12,7 +12,12 @@ import {
     FormSubmittedAction,
     useAddProductReducer,
 } from './reducer';
-import { Product, ProductLine, SubmitLine } from '../products/models';
+import {
+    Product,
+    ProductLine,
+    SubmitLine,
+    getReference,
+} from '../products/models';
 import { sizing } from '../styles/sizes';
 import {
     input,
@@ -24,7 +29,10 @@ import {
     solidBorder,
 } from '../styles/layout';
 import { alert, lightestGrey } from '../styles/colors';
-import { ProductDropdown } from '../filter-dropdown/ProductDropdown';
+import { FilterDropdown } from '../filter-dropdown/FilterDropdown';
+import { RootState } from '../Store';
+import { ProductActions } from '../products/Store';
+import { DropdownActions } from '../filter-dropdown/reducer';
 
 // STYLES
 
@@ -171,6 +179,36 @@ export function NewProduct({ submitLine }: NewProductProps): JSX.Element {
         [dispatch],
     );
 
+    const productsState = useSelector(({ products }: RootState) => products);
+    const productDispatch = useDispatch<Dispatch<ProductActions>>();
+    const getProducts = useCallback(() => {
+        productDispatch({
+            type: 'PRODUCTS_LOAD',
+        });
+    }, [productDispatch]);
+
+    const renderItem = (product: Product): ReactNode => (
+        <>
+            {product.reference} {product.description} {product.price}
+        </>
+    );
+
+    const filterItem = (filter: string) => (product: Product): boolean =>
+        filter === '' ||
+        product.reference.includes(filter) ||
+        product.description.includes(filter);
+
+    const loadProducts = (
+        dropdownDispatch: React.Dispatch<DropdownActions<Product>>,
+    ): void => {
+        if (productsState.state == 'LOADED') {
+            dropdownDispatch({
+                type: 'POPULATE_DROPDOWN_ITEMS',
+                items: productsState.products,
+            });
+        }
+    };
+
     return (
         <form className={horizontalCenterBaseline}>
             <span
@@ -179,10 +217,16 @@ export function NewProduct({ submitLine }: NewProductProps): JSX.Element {
                     flexDirection: 'column',
                 })}
             >
-                <ProductDropdown
+                <FilterDropdown
                     clearDropdown={submitted}
                     parentDispatch={formChanged}
-                ></ProductDropdown>
+                    filterItem={filterItem}
+                    getItemRef={getReference}
+                    renderItem={renderItem}
+                    loadItems={loadProducts}
+                    placeholder="Product Reference"
+                    getItems={getProducts}
+                ></FilterDropdown>
                 {/* <span
                     className={classes(
                         errorContainer,
@@ -238,10 +282,6 @@ export function NewProduct({ submitLine }: NewProductProps): JSX.Element {
             >
                 <FontAwesomeIcon icon={faPlus} />
             </button>
-            {/* <div>
-                {dropdownState.itemSelected && dropdownState.item.description}
-            </div>
-            <div>{dropdownState.itemSelected && dropdownState.item.price}</div> */}
             {/* <button
                 className={classes(
                     iconButton,

@@ -10,6 +10,11 @@ export interface ProductLine extends Product {
 
 export type SubmitLine = (product: ProductLine) => void;
 
+export const getReference = ({ reference }: Product): string => reference;
+
+export const productLinePrice = ({ price, quantity }: ProductLine): number =>
+    price * quantity;
+
 // PARSING
 
 const parseToProduct = (maybeProduct: object): maybeProduct is Product => {

@@ -5,13 +5,10 @@ import React, {
     RefObject,
     Dispatch,
 } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { style } from 'typestyle';
 import { hsla, borderColor, borderWidth } from 'csx';
 import { padding } from 'csstips';
-import { RootState } from '../Store';
 import { input, solidBorder, boxShadow } from '../styles/layout';
-import { Product } from '../products/models';
 import {
     lightestGrey,
     lighterGrey,
@@ -19,7 +16,6 @@ import {
     primary,
 } from '../styles/colors';
 import { ChildProps, NavigationKey, TypingKey } from '../types';
-import { ProductsState, ProductActions } from '../products/Store';
 import { sizing } from '../styles/sizes';
 import {
     DropdownActions,
@@ -41,43 +37,39 @@ const DropdownBody = ({ children }: ChildProps): JSX.Element => (
     </div>
 );
 
-const dropdownList = (
-    dispatch: Dispatch<DropdownActions<Product>>,
-    productsState: ProductsState,
-    dropdownState: DropdownState<Product>,
-): JSX.Element => {
-    const selectItem = (product: Product) => (): void => {
+function dropdownList<ItemType>(
+    dispatch: Dispatch<DropdownActions<ItemType>>,
+    state: DropdownState<ItemType>,
+    renderItem: (item: ItemType) => ReactNode,
+    loadItems: (dispatch: Dispatch<DropdownActions<ItemType>>) => void,
+    getItemRef: (item: ItemType) => string,
+): JSX.Element {
+    const selectItem = (item: ItemType) => (): void => {
         dispatch({
             type: 'DROPDOWN_ITEM_SELECTED',
-            item: product,
+            item,
         });
     };
 
-    if (!dropdownState.open) {
+    if (!state.open) {
         return <></>;
     }
 
-    if (productsState.state == 'LOADED' && !dropdownState.itemsLoaded) {
-        dispatch({
-            type: 'POPULATE_DROPDOWN_ITEMS',
-            items: productsState.products,
-        });
-    }
-
-    if (!dropdownState.itemsLoaded) {
+    if (!state.itemsLoaded) {
+        loadItems(dispatch);
         return <DropdownBody>loading</DropdownBody>;
     }
 
     return (
         <DropdownBody>
-            {dropdownState.filteredItems
-                .map<ReactNode>((product, idx) => (
+            {state.filteredItems
+                .map<ReactNode>((item, idx) => (
                     <div
-                        key={idx}
-                        onClick={selectItem(product)}
+                        key={getItemRef(item)}
+                        onClick={selectItem(item)}
                         className={style(
                             padding(sizing.normal, sizing.small),
-                            itemIsFocused(dropdownState.dropdownFocus, idx) && {
+                            itemIsFocused(state.dropdownFocus, idx) && {
                                 // background: primary.toString(),
                                 // color: primaryLightest.toString(),
                                 borderLeftColor: borderColor(
@@ -96,8 +88,7 @@ const dropdownList = (
                             },
                         )}
                     >
-                        {product.reference} {product.description}{' '}
-                        {product.price}
+                        {renderItem(item)}
                     </div>
                 ))
                 .reduce(
@@ -118,11 +109,11 @@ const dropdownList = (
                 )}
         </DropdownBody>
     );
-};
+}
 
-const useElementInFocus = (
-    dispatch: Dispatch<DropdownActions<Product>>,
-): RefObject<HTMLDivElement> => {
+function useElementInFocus<ItemType>(
+    dispatch: Dispatch<DropdownActions<ItemType>>,
+): RefObject<HTMLDivElement> {
     const elementRef = useRef<HTMLDivElement>(null);
     const elementInFocus = (event: MouseEvent): void => {
         if (
@@ -142,26 +133,30 @@ const useElementInFocus = (
         };
     });
     return elementRef;
-};
-
-export interface ProductDropdownProps {
-    parentDispatch: itemSet<Product>;
-    clearDropdown: boolean;
 }
 
-export function ProductDropdown({
+export interface FilterDropdownProps<ItemType> {
+    parentDispatch: itemSet<ItemType>;
+    clearDropdown: boolean;
+    renderItem: (item: ItemType) => ReactNode;
+    filterItem: (filter: string) => (item: ItemType) => boolean;
+    getItemRef: (item: ItemType) => string;
+    loadItems: (dispatch: Dispatch<DropdownActions<ItemType>>) => void;
+    placeholder: string;
+    getItems?: () => void;
+}
+
+export function FilterDropdown<ItemType>({
     clearDropdown,
     parentDispatch,
-}: ProductDropdownProps): JSX.Element {
-    const products = useSelector(({ products }: RootState) => products);
-    const productDispatch = useDispatch<Dispatch<ProductActions>>();
-
-    const [state, dispatch] = useDropdownReducer<Product>(
-        (filter) => (product): boolean =>
-            filter === '' ||
-            product.reference.includes(filter) ||
-            product.description.includes(filter),
-    );
+    renderItem,
+    filterItem,
+    getItemRef,
+    loadItems,
+    placeholder,
+    getItems,
+}: FilterDropdownProps<ItemType>): JSX.Element {
+    const [state, dispatch] = useDropdownReducer<ItemType>(filterItem);
     const elementRef = useElementInFocus(dispatch);
     useEffect(() => {
         if (clearDropdown) {
@@ -185,9 +180,7 @@ export function ProductDropdown({
         });
     };
     const onDropdownFocus = (): void => {
-        productDispatch({
-            type: 'PRODUCTS_LOAD',
-        });
+        getItems && getItems();
         dispatch({
             type: 'DROPDOWN_SELECTED',
         });
@@ -200,15 +193,15 @@ export function ProductDropdown({
             return state.filter;
         }
         if (state.itemSelected) {
-            return state.item.reference;
+            return getItemRef(state.item);
         }
         return '';
     };
     const getPlaceholder = (): string => {
         if (state.itemsLoaded && state.itemSelected) {
-            return state.item.reference;
+            return getItemRef(state.item);
         }
-        return 'Product Reference';
+        return placeholder;
     };
     const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
         if (!state.itemsLoaded) {
@@ -282,8 +275,15 @@ export function ProductDropdown({
                 onChange={onfilterUpdated}
                 value={getInputValue()}
                 placeholder={getPlaceholder()}
+                autoFocus
             ></input>
-            {dropdownList(dispatch, products, state)}
+            {dropdownList<ItemType>(
+                dispatch,
+                state,
+                renderItem,
+                loadItems,
+                getItemRef,
+            )}
         </div>
     );
 }
